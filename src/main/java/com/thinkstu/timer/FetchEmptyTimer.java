@@ -34,6 +34,39 @@ public class FetchEmptyTimer {
     final DateTimeFormatter YYYY_MM_dd = DateTimeFormatter.ofPattern("YYYY-MM-dd");
     HashMap<Integer, int[]> hashMap;
 
+
+    @Scheduled(initialDelay = 1_000, fixedRate = 10800_000)
+    void autoFetch() throws Exception {
+        String        cookie = cookieUtils.get();       // 获取 cookie，如果不可用则会自动更新一次
+//        LocalDateTime now    = LocalDateTime.now();     // 获取今天的日期，格式范例：2023-04-04
+        LocalDateTime now     = LocalDateTime.of(2023, 4, 30, 12, 0);
+//
+        for (int i = 0; i < 6; i++) {
+            fetchSomeday(cookie, now.plus(i, ChronoUnit.DAYS));
+            Thread.sleep(3000);
+        }
+    }
+
+    private void fetchSomeday(String cookie, LocalDateTime now) throws Exception {
+        ParamEntity param1  = new ParamEntity(YYYY_MM_dd.format(now), 1);
+        ParamEntity param2  = new ParamEntity(YYYY_MM_dd.format(now), 2);
+        ParamEntity param3  = new ParamEntity(YYYY_MM_dd.format(now), 3);
+        ParamEntity param10 = new ParamEntity(YYYY_MM_dd.format(now), 10);
+        // for 循环，从 1~8，对应我们定义的时段
+        for (int i = 1; i < 9; i++) {
+            int[] times = hashMap.get(i);
+            executor.execute(() -> {
+                        generateJSON.generate1(requestUtils.post(cookie, param1.setTime(times[1], times[2])), now, times[0]);
+                        generateJSON.generate2(requestUtils.post(cookie, param2.setTime(times[1], times[2])), now, times[0]);
+                        generateJSON.generate3(requestUtils.post(cookie, param3.setTime(times[1], times[2])), now, times[0]);
+                        generateJSON.generate10(requestUtils.post(cookie, param10.setTime(times[1], times[2])), now, times[0]);
+                        log.info("===》{} ，第 {} 次执行完毕！", now.format(YYYY_MM_dd),times[0]);
+                    }
+            );
+        }
+    }
+
+    // 初始化一些数据，这里为：时段划分、开始节次、结束节次
     @PostConstruct
     void initial() {
         hashMap = new HashMap<>();
@@ -46,43 +79,4 @@ public class FetchEmptyTimer {
         hashMap.put(7, new int[]{7, 8, 9});
         hashMap.put(8, new int[]{8, 10, 12});
     }
-
-    @Scheduled(initialDelay = 1_000, fixedRate = 10800_000)
-    void autoFetch() throws Exception {
-        String cookie = cookieUtils.get();  // 获取 cookie
-        cookieUtils.check(cookie);  // 如果不可用则更新
-
-        // 获取今天的日期，格式范例：2023-04-04
-        LocalDateTime now = LocalDateTime.now(); // 当前日期和时间
-
-        /**
-         * TODO 开始发送请求
-         * 存在问题：
-         * 1、四个校区
-         * 2、6个时段
-         */
-//        ParamEntity param = new ParamEntity(YYYY_MM_dd.format(now.plus(2, ChronoUnit.DAYS)), 10);
-
-        for (int i = 0; i < 4; i++) {
-            fetchSomeday(cookie, now.plus(i, ChronoUnit.DAYS));
-            Thread.sleep(3000);
-        }
-        log.info("===》程序运行完毕！");
-    }
-
-    private void fetchSomeday(String cookie, LocalDateTime now) throws Exception {
-        ParamEntity param = new ParamEntity(YYYY_MM_dd.format(now), 10);
-        // for 循环，从 1~8，对应我们定义的时段
-        for (int i = 1; i < 9; i++) {
-            int[] times = hashMap.get(i);
-            executor.execute(() -> {
-                        generateJSON.generate10(requestUtils.post(cookie, param.setTime(times[1], times[2])), now, times[0]);
-                        generateJSON.generate1(requestUtils.post(cookie, param.setTime(times[1], times[2])), now, times[0]);
-                        generateJSON.generate2(requestUtils.post(cookie, param.setTime(times[1], times[2])), now, times[0]);
-                        generateJSON.generate3(requestUtils.post(cookie, param.setTime(times[1], times[2])), now, times[0]);
-                    }
-            );
-        }
-    }
-
 }

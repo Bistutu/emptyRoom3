@@ -35,6 +35,7 @@ public class CookieUtils {
         } catch (Exception e) {
             // 什么也不做
         }
+        emptyCookie = check(emptyCookie);
         return emptyCookie;
     }
 
@@ -43,7 +44,7 @@ public class CookieUtils {
      * 如果过期我们会更新该 Cookie 的值<br>
      * 该函数的作用：保持 cookie 最新！
      */
-    public void check(String cookie) {
+    public String check(String cookie) {
         // 测试：尝试导出一次空教室数据
         Request request = new Request.Builder()
                 .url("https://jwxt.bistu.edu.cn/jwapp/sys/kxjas/modules/kxjscx/cxkxjs.do")
@@ -53,27 +54,29 @@ public class CookieUtils {
                 .build();
         // cookie 的 3 种状态：1、不需要更新，2、更新成功，3、更新失败（发生异常）
         try (Response response = client.newCall(request).execute()) {
-            // 如果 Cookie 失效，则调用函数更新 cookie
+            // 如果 cookie 失效，则更新
             if (!response.header("X-Frame-Options").equals("SAMEORIGIN")) {
-                this.update();
+                cookie = this.update();
+                log.info("===》cookie 更新成功");
             } else {
                 log.info("===》cookie 不需要更新");
-                return;
             }
         } catch (Exception e) {
             log.error("===》发生异常，cookie 更新失败！！！");
         }
-        log.info("===》cookie 更新成功");
+        return cookie;
     }
 
     /**
      * 更新 cookie 的值
      */
-    void update() throws IOException {
+    String update() throws IOException {
         Request request = new Request.Builder()
                 .url("http://bistu.thinkstu.com/bistu/empty"
-                        + "?username=2018010426"
-                        + "&password=Bistu123456")
+//                        + "?username=2018010426"
+//                        + "&password=Bistu123456")
+                        + "?username=2018011184"
+                        + "&password=aaa212265")
                 .build();
         Response response    = client.newCall(request).execute();
         String   emptyCookie = JSON.parseObject(response.body().string(), CookieEntity.class).getEmptyCookie();
@@ -83,5 +86,6 @@ public class CookieUtils {
         FileWriter fw   = new FileWriter(file, false);
         fw.write(emptyCookie);
         fw.close();
+        return emptyCookie;
     }
 }

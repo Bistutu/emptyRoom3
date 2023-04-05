@@ -21,7 +21,7 @@ public class GenerateJSON {
     @Autowired
     PathRunnerAndUtils pathRunnerAndUtils;
     final DateTimeFormatter MMdd = DateTimeFormatter.ofPattern("MMdd");
-    Pattern pattern = Pattern.compile("[^\\u4E00-\\u9FA5]+");
+    Pattern pattern = Pattern.compile("[^\\u4E00-\\u9FA5]+");   // 非中文匹配
     Pattern excludePattern10 = Pattern.compile(".*(WLA-(10[123]|30[1259]))|(WLC-112).*");  // 新校区需要排除的教室
     Pattern excludePattern2 = Pattern.compile("2-3-\\d.*|.*(102|108|303|407).*");  // 健翔桥校区需要排除的教室
 
@@ -45,7 +45,6 @@ public class GenerateJSON {
         map.put("文理楼A", wla);
         map.put("文理楼B", wlb);
         map.put("文理楼C", wlc);
-
         // [^\u4E00-\u9FA5]+ 匹配非中文字符，新校区不需要含中文的教室
         // []表示字符集合^表示取反，\u4E00-\u9FA5表示Unicode中的中文字符范围，+表示匹配一次或多次。
         for (EmptyResultEntity.DatasBean.CxkxjsBean.RowsBean row : rows) {
@@ -68,14 +67,15 @@ public class GenerateJSON {
                 map.get(key).addLast(split[1]);
             }
         }
-        // 新增教室，暂未启动（但是已经可以使用）
-        map.get("文理楼A").addLast("408");
-        map.get("文理楼A").addLast("512");
-        map.get("文理楼C").addLast("109");
-        // 手动删除某间教室
+        // 检测，如果全部为空！则标明教务网此次请求存在 error，这里就会抛出异常，就不会将数据写入文件
+        checkAllEmpty(map);
+        // 新增教室，教室未录入教务网，但是已经可以使用
+//        map.get("文理楼A").addLast("408");
+//        map.get("文理楼A").addLast("512");
+//        map.get("文理楼C").addLast("109");
+        // 手动删除一些无法使用的教室
         xxa.remove("301");
         xxb.remove("101");
-
         // 文理 A/C 需要排序
         Collections.sort(wla, new IntegerComparator());
         Collections.sort(wlc, new IntegerComparator());
@@ -85,12 +85,13 @@ public class GenerateJSON {
                 linkedList.addLast("无");
             }
         }
-        System.out.println(rows.size());
-        String json = JSON.toJSONString(map);
+        System.out.println("昌平：" + now + " ：" + rows.size());
 
         // 输出至文件
-        try (PrintWriter printWriter = new PrintWriter(pathRunnerAndUtils.getPath() + "/4/4" + MMdd.format(now) + time + ".json")) {
-            printWriter.print(json);
+        StringBuilder filename = new StringBuilder();
+        filename.append(pathRunnerAndUtils.getPath()).append("/4/4").append(MMdd.format(now)).append(time).append(".json");
+        try (PrintWriter printWriter = new PrintWriter(filename.toString())) {
+            printWriter.print(JSON.toJSONString(map));
         } catch (Exception e) {
         }
     }
@@ -124,19 +125,31 @@ public class GenerateJSON {
                 map.get(key).addLast(split[2]);
             }
         }
+        // 检测，如果全部为空！则标明教务网此次请求存在 error，这里就会抛出异常，就不会将数据写入文件
+        checkAllEmpty(map);
         // 如果当前时段没有空教室，则标记为“无”
         for (LinkedList linkedList : map.values()) {
             if (linkedList.size() == 0) {
                 linkedList.addLast("无");
             }
         }
-        System.out.println(rows.size());
-        String json = JSON.toJSONString(map);
+        System.out.println("小营：" + now + " ：" + rows.size());
         // 输出至文件
-        try (PrintWriter printWriter = new PrintWriter(pathRunnerAndUtils.getPath() + "/1/1" + MMdd.format(now) + time + ".json")) {
-            printWriter.print(json);
+        StringBuilder filename = new StringBuilder();
+        filename.append(pathRunnerAndUtils.getPath()).append("/1/1").append(MMdd.format(now)).append(time).append(".json");
+
+        try (PrintWriter printWriter = new PrintWriter(filename.toString())) {
+            printWriter.print(JSON.toJSONString(map));
         } catch (Exception e) {
         }
+    }
+
+    private void checkAllEmpty(HashMap<String, LinkedList> map) {
+        int check = 0;
+        for (LinkedList linkedList : map.values()) {
+            if (linkedList.size() != 0) check = 1;
+        }
+        if (check == 0) throw new RuntimeException("教务网数据为空！");
     }
 
 
@@ -177,17 +190,20 @@ public class GenerateJSON {
                 });
             }
         }
+        // 检测，如果全部为空！则标明教务网此次请求存在 error，这里就会抛出异常，就不会将数据写入文件
+        checkAllEmpty(map);
         // 如果当前时段没有空教室，则标记为“无”
         for (LinkedList linkedList : map.values()) {
             if (linkedList.size() == 0) {
                 linkedList.addLast("无");
             }
         }
-        System.out.println(rows.size());
-        String json = JSON.toJSONString(map);
+        System.out.println("健翔桥：" + now + " ：" + rows.size());
         // 输出至文件
-        try (PrintWriter printWriter = new PrintWriter(pathRunnerAndUtils.getPath() + "/2/2" + MMdd.format(now) + time + ".json")) {
-            printWriter.print(json);
+        StringBuilder filename = new StringBuilder();
+        filename.append(pathRunnerAndUtils.getPath()).append("/2/2").append(MMdd.format(now)).append(time).append(".json");
+        try (PrintWriter printWriter = new PrintWriter(filename.toString())) {
+            printWriter.print(JSON.toJSONString(map));
         } catch (Exception e) {
         }
     }
@@ -217,18 +233,20 @@ public class GenerateJSON {
             if (key.equals("skip")) continue;
             map.get(key).addLast(split[2]);
         }
+        // 检测，如果全部为空！则标明教务网此次请求存在 error，这里就会抛出异常，就不会将数据写入文件
+        checkAllEmpty(map);
         // 如果当前时段没有空教室，则标记为“无”
         for (LinkedList linkedList : map.values()) {
             if (linkedList.size() == 0) {
                 linkedList.addLast("无");
             }
         }
-        System.out.println(rows.size());
-        String json = JSON.toJSONString(map);
-
+        System.out.println("清河：" + now + " ：" + rows.size());
         // 输出至文件
-        try (PrintWriter printWriter = new PrintWriter(pathRunnerAndUtils.getPath() + "/3/3" + MMdd.format(now) + time + ".json")) {
-            printWriter.print(json);
+        StringBuilder filename = new StringBuilder();
+        filename.append(pathRunnerAndUtils.getPath()).append("/3/3").append(MMdd.format(now)).append(time).append(".json");
+        try (PrintWriter printWriter = new PrintWriter(filename.toString())) {
+            printWriter.print(JSON.toJSONString(map));
         } catch (Exception e) {
         }
     }
