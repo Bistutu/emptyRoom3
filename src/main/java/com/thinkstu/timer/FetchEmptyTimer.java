@@ -38,10 +38,10 @@ public class FetchEmptyTimer {
     @Scheduled(initialDelay = 1_000, fixedRate = 10800_000)
     void autoFetch() throws Exception {
         String        cookie = cookieUtils.get();       // 获取 cookie，如果不可用则会自动更新一次
-//        LocalDateTime now    = LocalDateTime.now();     // 获取今天的日期，格式范例：2023-04-04
-        LocalDateTime now     = LocalDateTime.of(2023, 4, 30, 12, 0);
-//
-        for (int i = 0; i < 6; i++) {
+        LocalDateTime now    = LocalDateTime.now();     // 获取今天的日期，格式范例：2023-04-04
+//        LocalDateTime now     = LocalDateTime.of(2023, 4, 30, 12, 0);
+        // 测试，只查询 1 天
+        for (int i = 1; i < 5; i++) {
             fetchSomeday(cookie, now.plus(i, ChronoUnit.DAYS));
             Thread.sleep(3000);
         }
@@ -60,7 +60,7 @@ public class FetchEmptyTimer {
                         generateJSON.generate2(requestUtils.post(cookie, param2.setTime(times[1], times[2])), now, times[0]);
                         generateJSON.generate3(requestUtils.post(cookie, param3.setTime(times[1], times[2])), now, times[0]);
                         generateJSON.generate10(requestUtils.post(cookie, param10.setTime(times[1], times[2])), now, times[0]);
-                        log.info("===》{} ，第 {} 次执行完毕！", now.format(YYYY_MM_dd),times[0]);
+                        log.info("===》{} ，第 {} 次执行完毕！", now.format(YYYY_MM_dd), times[0]);
                     }
             );
         }

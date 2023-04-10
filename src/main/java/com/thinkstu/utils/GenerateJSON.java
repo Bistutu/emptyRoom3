@@ -37,14 +37,14 @@ public class GenerateJSON {
         LinkedList<String>                                    wla    = new LinkedList<>();
         LinkedList<String>                                    wlb    = new LinkedList<>();
         LinkedList<String>                                    wlc    = new LinkedList<>();
-        HashMap<String, LinkedList>                           map    = new HashMap<>();
-        map.put("信息楼A", xxa);
-        map.put("信息楼B", xxb);
-        map.put("信息楼C", xxc);
-        map.put("信息楼D", xxd);
-        map.put("文理楼A", wla);
-        map.put("文理楼B", wlb);
-        map.put("文理楼C", wlc);
+        LinkedHashMap<String, LinkedList>                           map    = new LinkedHashMap<>();
+        map.put("文理楼A \uD83D\uDCD4 ", wla);
+        map.put("文理楼B \uD83D\uDCD4 ", wlb);
+        map.put("文理楼C \uD83D\uDCD4 ", wlc);
+        map.put("信息楼A \uD83D\uDCBB ", xxa);
+        map.put("信息楼B \uD83D\uDCBB ", xxb);
+        map.put("信息楼C \uD83D\uDCBB ", xxc);
+        map.put("信息楼D \uD83D\uDCBB ", xxd);
         // [^\u4E00-\u9FA5]+ 匹配非中文字符，新校区不需要含中文的教室
         // []表示字符集合^表示取反，\u4E00-\u9FA5表示Unicode中的中文字符范围，+表示匹配一次或多次。
         for (EmptyResultEntity.DatasBean.CxkxjsBean.RowsBean row : rows) {
@@ -54,13 +54,13 @@ public class GenerateJSON {
                 // 拆分教室名称，如 XXA-101，并添加至队列
                 String[] split = classroom.split("-");
                 String key = switch (split[0]) {
-                    case "XXA" -> "信息楼A";
-                    case "XXB" -> "信息楼B";
-                    case "XXC" -> "信息楼C";
-                    case "XXD" -> "信息楼D";
-                    case "WLA" -> "文理楼A";
-                    case "WLB" -> "文理楼B";
-                    case "WLC" -> "文理楼C";
+                    case "XXA" -> "信息楼A \uD83D\uDCBB ";
+                    case "XXB" -> "信息楼B \uD83D\uDCBB ";
+                    case "XXC" -> "信息楼C \uD83D\uDCBB ";
+                    case "XXD" -> "信息楼D \uD83D\uDCBB ";
+                    case "WLA" -> "文理楼A \uD83D\uDCD4 ";
+                    case "WLB" -> "文理楼B \uD83D\uDCD4 ";
+                    case "WLC" -> "文理楼C \uD83D\uDCD4 ";
                     default -> "skip";
                 };
                 if (key.equals("skip")) continue;
@@ -75,7 +75,7 @@ public class GenerateJSON {
 //        map.get("文理楼C").addLast("109");
         // 手动删除一些无法使用的教室
         xxa.remove("301");
-        xxb.remove("101");
+//        xxb.remove("101");
         // 文理 A/C 需要排序
         Collections.sort(wla, new IntegerComparator());
         Collections.sort(wlc, new IntegerComparator());
@@ -103,7 +103,7 @@ public class GenerateJSON {
         LinkedList<String>                                    one    = new LinkedList<>();
         LinkedList<String>                                    two    = new LinkedList<>();
         LinkedList<String>                                    fourth = new LinkedList<>();
-        HashMap<String, LinkedList>                           map    = new HashMap<>();
+        LinkedHashMap<String, LinkedList>                           map    = new LinkedHashMap<>();
         map.put("第一教学楼", one);
         map.put("第二教学楼", two);
         map.put("第四教学楼", fourth);
@@ -144,7 +144,7 @@ public class GenerateJSON {
         }
     }
 
-    private void checkAllEmpty(HashMap<String, LinkedList> map) {
+    private void checkAllEmpty(Map<String, LinkedList> map) {
         int check = 0;
         for (LinkedList linkedList : map.values()) {
             if (linkedList.size() != 0) check = 1;
@@ -159,7 +159,7 @@ public class GenerateJSON {
         List<EmptyResultEntity.DatasBean.CxkxjsBean.RowsBean> rows   = result.getDatas().getCxkxjs().getRows();
         LinkedList<String>                                    jt     = new LinkedList<>();
         LinkedList<String>                                    two    = new LinkedList<>();
-        HashMap<String, LinkedList>                           map    = new HashMap<>();
+        LinkedHashMap<String, LinkedList>                           map    = new LinkedHashMap<>();
         map.put("阶梯教室", jt);
         map.put("第二教学楼", two);
 
@@ -215,7 +215,7 @@ public class GenerateJSON {
         LinkedList<String>                                    one    = new LinkedList<>();
         LinkedList<String>                                    two    = new LinkedList<>();
         LinkedList<String>                                    third  = new LinkedList<>();
-        HashMap<String, LinkedList>                           map    = new HashMap<>();
+        LinkedHashMap<String, LinkedList>                           map    = new LinkedHashMap<>();
         map.put("第一教学楼", one);
         map.put("第二教学楼", two);
         map.put("第三教学楼", third);
