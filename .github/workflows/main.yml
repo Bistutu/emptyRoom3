@@ -22,8 +22,12 @@ jobs:
 
     - name: Install Maven
       run: |
-        sudo apt update
-        sudo apt install -y maven
+        wget https://archive.apache.org/dist/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz
+        tar -xzf apache-maven-3.8.4-bin.tar.gz
+        sudo mv apache-maven-3.8.4 /opt/maven
+        echo "M2_HOME=/opt/maven" | sudo tee -a /etc/environment
+        echo "PATH=\$M2_HOME/bin:\$PATH" | sudo tee -a /etc/environment
+        source /etc/environment
 
     - name: Install native-image
       run: gu install native-image
